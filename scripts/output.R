@@ -10,6 +10,10 @@
   library(multcomp)
   
   library(fitdistrplus)
+  
+  library(ggplot2)
+  library(viridis)
+  
 }
 #------------------------------------------------------------------------------#
 
@@ -25,202 +29,108 @@ d_field <- read.csv("data/raw/semifield_swarm.csv",header=T)
 d_colony_found <- read.csv("data/raw/colony_foundation.csv",header=T)
 d_hybrid_found <- read.csv("data/raw/hybrid_foundation.csv",header=T)
 
-d_lab_5 <- d_lab[d_lab$temp==5,]
-d_lab_20 <- d_lab[d_lab$temp==20,]
+d_lab_5 <- d_lab[d_lab$temp_treat==5,]
+d_lab_20 <- d_lab[d_lab$temp_treat==20,]
 
-library(ggplot2)
-ggplot(d20, aes(x = day, y=total, col=ID))  +
-  #scale_y_log10() +
-  geom_path()
-
-ggplot(d_field, aes(x = day, y=alates, col=as.factor(colony_id)))  +
+## time development
+ggplot(d_field, aes(x = day, y=alates))  +
   geom_path() +
-  scale_y_log10()
+  geom_point() +
+  facet_grid(colony_id~., scales = "free") +
+  theme_classic() +
+  theme(strip.background = element_blank(),
+    strip.text.y = element_blank()  ) +
+  xlab("Day")+
+  ylab("Alates")
 
-# i-delta to examine how the occurence is concentrated
-L <- length(swarm_data[,1])
-flight_term <- swarm_data[1:L,]
-for(i in 1:length(swarm_data[1,])){
-  fd <- flight_term[,i]
-  end_flight <- max( (1:length(fd))[fd>0] )
-  fd <- fd[1:end_flight]
-  print(Idelta(fd))
-}
+ggplot(d_field[d_field$colony_id == "col-1",])  +
+  geom_path(aes(x = day, y=ave_temp)) +
+  geom_path(aes(x = day, y=min_temp)) +
+  geom_path(aes(x = day, y=max_temp)) +
+  ylim(-5,45) +
+  theme_classic()+
+  xlab("Day")+
+  ylab("Temperature (°C)")
 
-# Exponential: time-invarient occurence
-# Weibull: shape parameter > 1 the probability increase according to time
-par(mfrow=c(3,2), pin=c(3,1))
-for(i in 1:length(swarm_data[1,])){
-  fd <- flight_term[,i]
-  end_flight <- max( (1:length(fd))[fd>0] )
-  fd <- fd[1:end_flight]
-  
-  L2 <- length(fd)
-  fit_data <- rep(1:L2, flight_term[1:L2,i])
-  id <- colnames(flight_term)[i]
-  matplot(cuml_swarm_data[1:L,i]/max(cuml_swarm_data[,i]), type="o", pch=19,
-          xlab="day", ylab="Cumulative proportion", main=id, axes=F)
-  axis(1)
-  axis(2, at=c(0,0.5,1), las=1)
-  box()
-  
-  #weibull_fit <- fitdistr(fit_data, densfun="weibull")
-  weibull_fit <- fitdist(fit_data, distr="weibull", method="mle")
-  r <- summary(weibull_fit)
-  #print(r$aic)
-  #print(r$estimate[2])
-  points(1:L2, pweibull(1:L2, weibull_fit$estimate[1], weibull_fit$estimate[2]), type="l", col=2 )
-  
-  #exp_fit <- fitdistr(fit_data, densfun="exponential")
-  exp_fit <- fitdist(fit_data, distr="exp", method="mle")
-  r <- summary(exp_fit)
-  print(r$aic)
-  points(1:L2, pexp(1:L2, exp_fit$estimate[1]), type="l", col=4 )
-  
-}
+## Logistic fitting max temp vs alate fraction
+total_nest_alate = tapply(d_field$cumulative_alate, d_field$colony_id, max)
+d_field$alate_remaining_nest = rep(total_nest_alate, each = 40) - d_field$cumulative_alate
 
+r <- glmer(cbind(alates, alate_remaining_nest)~max_temp+(1|colony_id), 
+           family=binomial(link="logit"), data=d_field[d_field$end ==0,])
+summary(r)
+Anova(r)
 
+logistic <- function(x){ 1/(1+exp(-x)) }
+Est <- summary(r)$coefficient[,1]
+fit_x <- seq(min(d_field[d_field$end==0,]$max_temp),
+             max(d_field[d_field$end==0,]$max_temp),length.out=120) 
+fit_y <- logistic(Est[1]+Est[2]*xdata)
+logistic_fitting <- data.frame(fit_x, fit_y)
 
-r <- glmer(cbind(total,remain)~max+(1|Colony_num), 
+ggplot(d_field[d_field$end==0,])+
+  geom_point( aes(x=max_temp, y=alate_fraction),
+              alpha=1) +
+  theme_classic()+
+  #scale_color_viridis(discrete=F)+
+  xlab("Maximum temperature (°C)")+
+  ylab("Fraction of alates swarmed")+
+  geom_line(aes(fit_x, fit_y), data=logistic_fitting)
+
+r <- glmer(cbind(alates, alate_remaining_nest)~ave_temp+(1|colony_id), 
+           family=binomial(link="logit"), data=d_field[d_field$end ==0,])
+summary(r)
+Anova(r)
+
+r <- glmer(cbind(alates, alate_remaining_nest)~min_temp+(1|colony_id), 
            family=binomial(link="logit"), data=d_field[d_field$end ==0,])
 summary(r)
 Anova(r)
 
 
-par(pin=c(4,3))
 
-touka <- 0.3
-d$Col[d$Colony_num == 7] <- rgb(1, 0, 0, alpha=touka)
-d$Col[d$Colony_num == 2] <- rgb(0, 1, 0, alpha=touka)
-d$Col[d$Colony_num == 3] <- rgb(0, 0, 1, alpha=touka)
-d$Col[d$Colony_num == 4] <- rgb(1, 1, 0, alpha=touka)
-d$Col[d$Colony_num == 1] <- rgb(1, 0, 1, alpha=touka)
-d$Col[d$Colony_num == 6] <- rgb(0, 1, 1, alpha=touka)
-d$Col[d$Colony_num == 5] <- rgb(0, 0, 0, alpha=touka)
+## lab time development
+ggplot(d_lab_20, aes(x = day, y=alates))  +
+  geom_path() +
+  geom_point() +
+  facet_grid(ID~., scales = "free") +
+  theme_classic() +
+  theme(strip.background = element_blank(),
+        strip.text.y = element_blank()  ) +
+  xlab("Day")+
+  ylab("Alates")
 
-MinMax <- min(d[d$end==0,]$max)
-MaxMax <- max(d[d$end==0,]$max)
-plot(at_flight~max, data=d[d$end ==0,], col=Col, bg=Col, pch=21, cex=log10(total+remain),
-     xlab="maximum temperature (degree)", ylab="ratio of flight individual", las=1,
-     ylim=c(-0.05, 1.05), xlim=c(8,38))
-
-logistic <- function(x){ 1/(1+exp(-x)) }#???ʂ̃??W?X?e?B?b?N?Ȑ???????
-Est <- summary(r)$coefficient[,1]#?W???̗\???l???????o??
-xdata <- seq(MinMax, MaxMax,length.out=120) #x?͈̔͂??o??
-ydata <- logistic(Est[1]+Est[2]*xdata) #y?̒l???v?Z
-lines(xdata, ydata)#?????㏑??
+ggplot(d_lab_20[d_lab_20$ID == "A1",])  +
+  geom_path(aes(x = day, y=ave_temp)) +
+  geom_path(aes(x = day, y=min_temp)) +
+  geom_path(aes(x = day, y=max_temp)) +
+  theme_classic()+
+  ylim(-5,45) +
+  xlab("Day")+
+  ylab("Temperature (°C)")
 
 
-r <- glmer(cbind(total,remain)~ave+(1|Colony_num), family=binomial(link="logit"), data=d[d$end ==0,])
+## largest swarming
+df_largest_swarm = data.frame(
+  treat = c(rep("field", 7), rep("lab", 6)),
+  colony = c( unique(d_field$colony_id), unique(d_lab_20$ID)),
+  largest_swarm = c( tapply(d_field$alates, d_field$colony_id, max),
+                     tapply(d_lab_20$alates, d_lab_20$ID, max)),
+  total_swarm = c( tapply(d_field$cumulative_alate, d_field$colony_id, max),
+                   tapply(d_lab_20$cumlative, d_lab_20$ID, max))
+)
+
+r <- glmer(cbind(largest_swarm, total_swarm-largest_swarm) ~ 
+             treat+(1|colony), 
+           family=binomial(link="logit"), data=df_largest_swarm)
 summary(r)
 Anova(r)
 
+ggplot(df_largest_swarm, aes(x=treat, y = largest_swarm/total_swarm)) +
+  geom_boxplot() + 
+  geom_point() +
+  ylim(c(0,1))
 
-
-apply(swarm_data>0, 2, sum)
-
-for(i in 1:length(swarm_data[1,])){
-  term <- (1:length(swarm_data[,i]))[swarm_data[,i]>0]
-  print( max(term) - min(term) + 1 )
-}
-
-
-L <- length(swarm_data[,1])
-flight_term <- swarm_data[1:L,]
-for(i in 1:length(swarm_data[1,])){
-  fd <- flight_term[,i]
-  end_flight <- max( (1:length(fd))[fd>0] )
-  fd <- fd[1:end_flight]
-  print(Idelta(fd))
-}
-
-par(mfrow=c(4,2), pin=c(3,1))
-for(i in 1:length(swarm_data[1,])){
-  fd <- flight_term[,i]
-  end_flight <- max( (1:length(fd))[fd>0] )
-  fd <- fd[1:end_flight]
-  L2 <- length(fd)
-  fit_data <- rep(1:L2, flight_term[1:L2,i])
-  id <- colnames(flight_term)[i]
-  matplot(cuml_swarm_data[1:L,i]/max(cuml_swarm_data[,i]), type="o", pch=19,
-          xlab="day", ylab="Cumulative proportion", main=id, axes=F)
-  axis(1)
-  axis(2, at=c(0,0.5,1), las=1)
-  box()
-  
-  if(i==1||i==4){print(NA);next;}
-  
-  #weibull_fit <- fitdistr(fit_data, densfun="weibull")
-  weibull_fit <- fitdist(fit_data, distr="weibull", method="mle")
-  r <- summary(weibull_fit)
-  #print(r$aic)
-  #print(r$estimate[1])
-  #print(r$estimate[2])
-  points(1:L2, pweibull(1:L2, weibull_fit$estimate[1], weibull_fit$estimate[2]), type="l", col=2 )
-  
-  #exp_fit <- fitdistr(fit_data, densfun="exponential")
-  exp_fit <- fitdist(fit_data, distr="exp", method="mle")
-  r <- summary(exp_fit)
-  print(r$aic)
-  points(1:L2, pexp(1:L2, exp_fit$estimate[1]), type="l", col=4 )
-  
-}
-
-
-
-
-
-d_colony_found
-d_dish <- d_colony_found[d_colony_found$case=="dish",]
-
-## main
-# 1. analysis for foundation success
-found <- tapply(d_dish$foundation, d_dish$treat, mean)
-Fig <- barplot(found[c(3,1,2)], ylim=c(0,1), col="#545454", las=1,
-               ylab="foundation ratio", xlab="treatment")
-r <- glmer(foundation ~ treat + (1|colony), family=binomial(link="logit"), data=d_dish)
-Anova(r)
-multicomparison<-glht(r,linfct=mcp(treat="Tukey"))
-summary(multicomparison)
-
-
-# 2. brood (offspring, total:include eggs)
-d_suc <- d_dish[d_dish$foundation == 1,]
-offspring_mean <- tapply(d_suc$offspring, d_suc$treat, mean)[c(3,1,2)]
-offspring_sd <- tapply(d_suc$offspring, d_suc$treat, sd)[c(3,1,2)]
-
-Fig <- barplot(offspring_mean, ylim=c(0,15), col="#545454", las=1,
-               ylab="number of offspring (worker, larva)", xlab="treatment")
-arrows(Fig, offspring_mean, Fig, offspring_mean+offspring_sd, angle=90,
-       length=0.1)
-r <- glmer(offspring ~ treat + (1|colony), family=poisson, data=d_suc)
-Anova(r)
-
-total_mean <- tapply(d_suc$total, d_suc$treat, mean)[c(3,1,2)]
-total_sd <- tapply(d_suc$total, d_suc$treat, sd)[c(3,1,2)]
-
-par(pin=c(3,3))
-Fig <- barplot(total_mean, ylim=c(0,22), col="#545454", las=1,
-               ylab="number of offspring (worker, larva, egg)", xlab="treatment")
-arrows(Fig, total_mean, Fig, total_mean+total_sd, angle=90,
-       length=0.1)
-r <- glmer(total ~ treat + (1|colony), family=poisson, data=d_suc)
-Anova(r)
-
-# 3. Hybrid
-found <- tapply(d$foundation, d$unit, mean)[c(2,3,1,4)]
-par(pin=c(3,3))
-Fig <- barplot(found, ylim=c(0,1), col="#545454", las=1,
-               ylab="foundation ratio", xlab="treatment")
-
-d2 <- d[d$foundation==1,]
-total_mean <- tapply(d2$total, d2$unit, mean)[c(2,3,1,4)]
-total_sd <- tapply(d2$total, d2$unit, sd)[c(2,3,1,4)]
-par(pin=c(3,3))
-Fig <- barplot(total_mean, ylim=c(0,25), col="#545454", las=1,
-               ylab="foundation ratio", xlab="treatment")
-arrows(Fig, total_mean, Fig, total_mean+total_sd, angle=90,
-       length=0.1)
 
 
 
