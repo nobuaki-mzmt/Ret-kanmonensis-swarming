@@ -32,10 +32,28 @@ d_hybrid_found <- read.csv("data/raw/hybrid_foundation.csv",header=T)
 d_lab_5 <- d_lab[d_lab$temp_treat==5,]
 d_lab_20 <- d_lab[d_lab$temp_treat==20,]
 
+
+## find outliers, using z-score
+outlier = NULL
+for (i in unique(d_field$colony_id) ){
+  x = subset(d_field, colony_id == i)$alates
+  outlier = c(outlier, abs(scale(x)) > 3)
+}
+d_field$outlier = outlier
+
+outlier = NULL
+for (i in unique(d_lab_20$ID) ){
+  x = subset(d_lab_20, ID == i)$alates
+  outlier = c(outlier, abs(scale(x)) > 3)
+}
+d_lab_20$outlier = outlier
+
+
 ## time development
 ggplot(d_field, aes(x = day, y=alates))  +
   geom_path() +
-  geom_point() +
+  geom_point(data=d_field[d_field$outlier,], col= 2) +
+  #geom_point(aes(col= outlier)) +
   facet_grid(colony_id~., scales = "free") +
   theme_classic() +
   theme(strip.background = element_blank(),
@@ -87,12 +105,10 @@ r <- glmer(cbind(alates, alate_remaining_nest)~min_temp+(1|colony_id),
 summary(r)
 Anova(r)
 
-
-
 ## lab time development
 ggplot(d_lab_20, aes(x = day, y=alates))  +
   geom_path() +
-  geom_point() +
+  geom_point(data=d_lab_20[d_lab_20$outlier,], col= 2) +
   facet_grid(ID~., scales = "free") +
   theme_classic() +
   theme(strip.background = element_blank(),
@@ -132,10 +148,5 @@ ggplot(df_largest_swarm, aes(x=treat, y = largest_swarm/total_swarm)) +
   ylim(c(0,1))
 
 
-
-
-
-
-
-
+##
 
