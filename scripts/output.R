@@ -15,6 +15,11 @@
   library(viridis)
   
 }
+{
+  swarming_output()
+  foundation_output()
+  hybrid_output()
+}
 #------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------#
@@ -103,52 +108,48 @@ swarming_output <- function(){
   }
   
   # Logistic fitting max temp vs alate fraction in the field
-  total_nest_alate = tapply(d_field$cumulative_alate, d_field$colony_id, max)
-  d_field$alate_remaining_nest = rep(total_nest_alate, each = 40) - d_field$cumulative_alate
-  
-  r <- glmer(cbind(alates, alate_remaining_nest)~max_temp+(1|colony_id), 
-             family=binomial(link="logit"), data=d_field[d_field$end ==0,])
-  summary(r)
-  Anova(r)
-  
-  logistic <- function(x){ 1/(1+exp(-x)) }
-  Est <- summary(r)$coefficient[,1]
-  fit_x <- seq(min(d_field[d_field$end==0,]$max_temp),
-               max(d_field[d_field$end==0,]$max_temp),length.out=120) 
-  fit_y <- logistic(Est[1]+Est[2]*fit_x)
-  logistic_fitting <- data.frame(fit_x, fit_y)
-  
-  ggplot(d_field[d_field$end==0,])+
-    geom_point( aes(x=max_temp, y=alate_fraction, col=alates),
-                alpha=1) +
-    scale_color_viridis(option = "A", end=0.8) +
-    theme_classic()+
-    #scale_color_viridis(discrete=F)+
-    xlab("Maximum temperature (°C)")+
-    ylab("Fraction of alates swarmed")+
-    geom_line(aes(fit_x, fit_y), data=logistic_fitting)+
-    theme(legend.position = "top")
-  ggsave("output/field_swarm_fitting_temp.pdf",
-         width=3, height=5)  
-  
-  
-  r <- glmer(cbind(alates, alate_remaining_nest)~ave_temp+(1|colony_id), 
-             family=binomial(link="logit"), data=d_field[d_field$end ==0,])
-  summary(r)
-  Anova(r)
-  
-  r <- glmer(cbind(alates, alate_remaining_nest)~min_temp+(1|colony_id), 
-             family=binomial(link="logit"), data=d_field[d_field$end ==0,])
-  summary(r)
-  Anova(r)
-  
-  hist(d_field[d_field$flight>0,"max_temp",])
-  hist(d_field[d_field$flight>0,"ave_temp",])
-  hist(d_field[d_field$flight>0,"min_temp",])
-  
-  ## lab time development
-  
-  ## largest swarming
+  {
+    total_nest_alate = tapply(d_field$cumulative_alate, d_field$colony_id, max)
+    d_field$alate_remaining_nest = rep(total_nest_alate, each = 40) - d_field$cumulative_alate
+    
+    r <- glmer(cbind(alates, alate_remaining_nest)~max_temp+(1|colony_id), 
+               family=binomial(link="logit"), data=d_field[d_field$end ==0,])
+    summary(r)
+    Anova(r)
+    
+    logistic <- function(x){ 1/(1+exp(-x)) }
+    Est <- summary(r)$coefficient[,1]
+    fit_x <- seq(min(d_field[d_field$end==0,]$max_temp),
+                 max(d_field[d_field$end==0,]$max_temp),length.out=120) 
+    fit_y <- logistic(Est[1]+Est[2]*fit_x)
+    logistic_fitting <- data.frame(fit_x, fit_y)
+    
+    ggplot(d_field[d_field$end==0,])+
+      geom_point( aes(x=max_temp, y=alate_fraction, col=alates),
+                  alpha=1) +
+      scale_color_viridis(option = "A", end=0.8) +
+      theme_classic()+
+      #scale_color_viridis(discrete=F)+
+      xlab("Maximum temperature (°C)")+
+      ylab("Fraction of alates swarmed")+
+      geom_line(aes(fit_x, fit_y), data=logistic_fitting)+
+      theme(legend.position = "top")
+    ggsave("output/field_swarm_fitting_temp.pdf",
+           width=3, height=5)  
+    
+    
+    r <- glmer(cbind(alates, alate_remaining_nest)~ave_temp+(1|colony_id), 
+               family=binomial(link="logit"), data=d_field[d_field$end ==0,])
+    summary(r)
+    Anova(r)
+    
+    r <- glmer(cbind(alates, alate_remaining_nest)~min_temp+(1|colony_id), 
+               family=binomial(link="logit"), data=d_field[d_field$end ==0,])
+    summary(r)
+    Anova(r)
+  }
+
+  # Comparison of the largest swarming
   df_largest_swarm = data.frame(
     treat = c(rep("field", 7), rep("lab", 6)),
     colony = c( unique(d_field$colony_id), unique(d_lab_20$ID)),
@@ -165,60 +166,97 @@ swarming_output <- function(){
   Anova(r)
   
   ggplot(df_largest_swarm, aes(x=treat, y = largest_swarm/total_swarm)) +
-    geom_boxplot() + 
     geom_point() +
-    ylim(c(0,1))
+    ylim(c(0,1)) +
+    theme_classic()+
+    xlab("")+
+    ylab("Fraction of alates swarmed")
+  ggsave("output/largest_swarm.pdf",
+         width=3, height=3)  
+  
 }
+#------------------------------------------------------------------------------#
 
+#------------------------------------------------------------------------------#
+# output of colony foundation experiments
+#------------------------------------------------------------------------------#
+foundation_output <- function(){
+  # data
+  d_colony_found <- read.csv("data/raw/colony_foundation.csv",header=T)
+  
+  d_dish <- d_colony_found[d_colony_found$case=="dish",] # removal the results of glass cell
+  
+  # colony foundation success
+  ggplot(d_dish, aes(x = treat, fill = as.factor(foundation))) + 
+    geom_bar(position = "fill", alpha = 0.8)+
+    scale_fill_viridis(discrete = T, direction = -1) +
+    theme_classic()+
+    theme(legend.position = "none")+
+    xlab("")+
+    ylab("Colony foundation success")
+  ggsave("output/foundation_success.pdf")
+  
+  r <- glmer(foundation ~ treat + (1|colony), family=binomial(link="logit"),
+             data=d_dish)
+  Anova(r)
+  multicomparison<-glht(r,linfct=mcp(treat="Tukey"))
+  summary(multicomparison)
+  
+  # offspring production
+  d_suc <- d_dish[d_dish$foundation == 1,]
+  
+  ggplot(data=d_suc, aes(x=treat, y=offspring, fill=treat))+
+    geom_dotplot(binaxis = 'y', stackdir = 'center', binwidth = 1, dotsize = .5, alpha = .5) +
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), 
+                 geom="pointrange", color="red") +
+    scale_fill_viridis(discrete = T, direction = -1) +
+    theme_classic()+
+    theme(legend.position = "none")+
+    xlab("")+
+    ylab("Number of offspring")
+  ggsave("output/foundation_offspring.pdf")
+  
+  r <- glmer(total ~ treat + (1|colony), family=poisson, data=d_suc)
+  Anova(r)
+}
+#------------------------------------------------------------------------------#
 
-##
-d_colony_found <- read.csv("data/raw/colony_foundation.csv",header=T)
-d_hybrid_found <- read.csv("data/raw/hybrid_foundation.csv",header=T)
+#------------------------------------------------------------------------------#
+# output of hybrid experiments
+#------------------------------------------------------------------------------#
+hybrid_output <- function(){
+  d_hybrid_found <- read.csv("data/raw/hybrid_foundation.csv",header=T)
 
-d_dish <- d_colony_found[d_colony_found$case=="dish",] # removal the results of glass cell
+  ggplot(d_hybrid_found, aes(x = unit, fill = as.factor(foundation))) + 
+    geom_bar(position = "fill", alpha = 0.8)+
+    scale_fill_viridis(discrete = T, direction = -1) +
+    theme_classic()+
+    theme(legend.position = "none")+
+    xlab("")+
+    ylab("Colony foundation success")
+  ggsave("output/hybrid_success.pdf")
+  
+  d_hybrid_found$unit <- as.factor(d_hybrid_found$unit)
+  r <- glm(foundation ~ unit, family=binomial(link="logit"),
+             data=d_hybrid_found)
+  Anova(r)
+  
+  d_suc <- d_hybrid_found[d_hybrid_found$foundation == 1,]
+  ggplot(data=d_suc, aes(x=unit, y=offspring, fill=unit))+
+    geom_dotplot(binaxis = 'y', stackdir = 'center', binwidth = 1, dotsize = .5, alpha = .5) +
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), 
+                 geom="pointrange", color="red") +
+    scale_fill_viridis(discrete = T, direction = -1) +
+    theme_classic()+
+    theme(legend.position = "none")+
+    xlab("")+
+    ylab("Number of offspring")
+  ggsave("output/hybgrid_offspring.pdf")
+  
+  r <- glm(total ~ unit, family=poisson, data=d_suc)
+  Anova(r)
+  multicomparison<-glht(r,linfct=mcp(unit="Tukey"))
+  summary(multicomparison)
 
-#
-ggplot(d_dish, aes(x = treat, fill = as.factor(foundation))) + 
-  geom_bar(position = "fill", alpha = 0.8)+
-  scale_fill_viridis(discrete = T, direction = -1) +
-  theme_classic()+
-  theme(legend.position = "none")+
-  xlab("")+
-  ylab("Colony foundation success")
-
-r <- glmer(foundation ~ treat + (1|colony), family=binomial(link="logit"),
-           data=d_dish)
-Anova(r)
-multicomparison<-glht(r,linfct=mcp(treat="Tukey"))
-summary(multicomparison)
-
-d_suc <- d_dish[d_dish$foundation == 1,]
-ggplot(data=d_suc, aes(x=treat, y=offspring))+
-  geom_boxplot()
-r <- glmer(total ~ treat + (1|colony), family=poisson, data=d_suc)
-Anova(r)
-
-
-## 
-
-ggplot(d_hybrid_found, aes(x = unit, fill = as.factor(foundation))) + 
-  geom_bar(position = "fill", alpha = 0.8)+
-  scale_fill_viridis(discrete = T, direction = -1) +
-  theme_classic()+
-  theme(legend.position = "none")+
-  xlab("")+
-  ylab("Colony foundation success")
-
-d_hybrid_found$unit <- as.factor(d_hybrid_found$unit)
-r <- glm(foundation ~ unit, family=binomial(link="logit"),
-           data=d_hybrid_found)
-Anova(r)
-
-d_suc <- d_hybrid_found[d_hybrid_found$foundation == 1,]
-ggplot(data=d_suc, aes(x=unit, y=offspring))+
-  geom_boxplot()
-r <- glm(total ~ unit, family=poisson, data=d_suc)
-Anova(r)
-multicomparison<-glht(r,linfct=mcp(unit="Tukey"))
-summary(multicomparison)
-
+}
+#------------------------------------------------------------------------------#
