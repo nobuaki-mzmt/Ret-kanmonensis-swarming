@@ -67,7 +67,7 @@ swarming_output <- function(){
       xlab("Day")+
       ylab("Alates")
     ggsave("output/field_swarm_timedevelopment.pdf",
-           width=3, height=5)  
+           width=3, height=4)  
     
     temp_cols = viridis(4, option = "C")
     ggplot(d_field[d_field$colony_id == "col-1",])  +
@@ -77,7 +77,8 @@ swarming_output <- function(){
       ylim(-5,45) +
       theme_classic()+
       xlab("Day")+
-      ylab("Temperature (°C)")
+      ylab("Temperature (°C)")+
+      geom_vline(xintercept  = (d_field$day[d_field$outlier]))
     ggsave("output/field_temp.pdf",
            width=3, height=1.5)  
     
@@ -92,7 +93,7 @@ swarming_output <- function(){
       xlab("Day")+
       ylab("Alates")
     ggsave("output/lab_swarm_timedevelopment.pdf",
-           width=3, height=5)  
+           width=3, height=4)  
     
     temp_cols = viridis(4, option = "C")
     ggplot(d_lab_20[d_lab_20$ID == "A1",])  +
@@ -150,30 +151,60 @@ swarming_output <- function(){
   }
 
   # Comparison of the largest swarming
-  df_largest_swarm = data.frame(
-    treat = c(rep("field", 7), rep("lab", 6)),
-    colony = c( unique(d_field$colony_id), unique(d_lab_20$ID)),
-    largest_swarm = c( tapply(d_field$alates, d_field$colony_id, max),
-                       tapply(d_lab_20$alates, d_lab_20$ID, max)),
-    total_swarm = c( tapply(d_field$cumulative_alate, d_field$colony_id, max),
-                     tapply(d_lab_20$cumlative, d_lab_20$ID, max))
-  )
-  
-  r <- glmer(cbind(largest_swarm, total_swarm-largest_swarm) ~ 
-               treat+(1|colony), 
-             family=binomial(link="logit"), data=df_largest_swarm)
-  summary(r)
-  Anova(r)
-  
-  ggplot(df_largest_swarm, aes(x=treat, y = largest_swarm/total_swarm)) +
-    geom_point() +
-    ylim(c(0,1)) +
-    theme_classic()+
-    xlab("")+
-    ylab("Fraction of alates swarmed")
-  ggsave("output/largest_swarm.pdf",
-         width=3, height=3)  
-  
+  {
+    df_largest_swarm = data.frame(
+      treat = c(rep("field", 7), rep("lab", 6)),
+      colony = c( unique(d_field$colony_id), unique(d_lab_20$ID)),
+      largest_swarm = c( tapply(d_field$alates, d_field$colony_id, max),
+                         tapply(d_lab_20$alates, d_lab_20$ID, max)),
+      total_swarm = c(tapply(d_field$alates * d_field$outlier, d_field$colony_id, sum),
+                      tapply(d_lab_20$alates * d_lab_20$outlier, d_lab_20$ID, sum)),
+      all_alates = c( tapply(d_field$cumulative_alate, d_field$colony_id, max),
+                       tapply(d_lab_20$cumlative, d_lab_20$ID, max))
+      )
+    
+    # large swarm is prediced by treatment and/or colony size?
+    r <- glmer(cbind(total_swarm, all_alates-total_swarm) ~ 
+                 log10(total_swarm)*treat+(1|colony), 
+               family=binomial(link="logit"), data=df_largest_swarm)
+    summary(r)
+    Anova(r)
+    
+    logistic <- function(x){ 1/(1+exp(-x)) }
+    Est <- summary(r)$coefficient[,1]
+    fit_x <- seq(log10(min(df_largest_swarm$all_alates)),
+                 log10(max(df_largest_swarm$all_alates)),length.out=120) 
+    fit_y1 <- logistic(Est[1]+(Est[2])*fit_x)
+    fit_y2 <- logistic(Est[1]+Est[3]+(Est[2]+Est[4])*fit_x)
+    logistic_fitting <- data.frame(fit_x, fit_y1, fit_y2)
+    
+    ggplot(df_largest_swarm, aes(x=log10(all_alates), 
+                                 y =(total_swarm)/(all_alates),
+                                 color=treat))+
+      geom_point()+
+      scale_color_viridis(discrete = T, end=0.5)+
+      ylim(c(0,1)) +
+      xlim(c(1,3.75)) +
+      theme_classic()+
+      theme(legend.position = "none")+
+      xlab("Log10 (All alates)")+
+      ylab("Fraction of alates swarmed")+
+      geom_line(aes(fit_x, fit_y1), data=logistic_fitting, color=viridis(3)[1])+
+      geom_line(aes(fit_x, fit_y2), data=logistic_fitting, color=viridis(3)[2])
+    ggsave("output/colonysize_synchronization.pdf",
+           width=3, height=3)
+      
+    
+    
+    ggplot(df_largest_swarm, aes(x=treat, y = total_swarm/all_alates)) +
+      geom_point() +
+      ylim(c(0,1)) +
+      theme_classic()+
+      xlab("")+
+      ylab("Fraction of alates swarmed")
+    ggsave("output/largest_swarm.pdf",
+           width=3, height=3)  
+  }
 }
 #------------------------------------------------------------------------------#
 
