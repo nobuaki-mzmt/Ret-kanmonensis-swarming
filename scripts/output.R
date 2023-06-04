@@ -109,14 +109,23 @@ swarming_output <- function(){
   }
   
   # Logistic fitting max temp vs alate fraction in the field
+  sink("swarming_stat.txt")
   {
+    cat("----------------------------------------------\n")
+    cat("Logistic fitting max temp vs alate fraction in semi-field\n")
+    cat("----------------------------------------------\n")
+    cat("##### max temp #####\n")
     total_nest_alate = tapply(d_field$cumulative_alate, d_field$colony_id, max)
     d_field$alate_remaining_nest = rep(total_nest_alate, each = 40) - d_field$cumulative_alate
     
     r <- glmer(cbind(alates, alate_remaining_nest)~max_temp+(1|colony_id), 
                family=binomial(link="logit"), data=d_field[d_field$end ==0,])
-    summary(r)
-    Anova(r)
+    cat('glmer(cbind(alates, alate_remaining_nest)~max_temp+(1|colony_id), 
+        family=binomial(link="logit")\n')
+    cat('summary(r)\n')
+    print(summary(r))
+    cat('Anova(r)\n')
+    print(Anova(r))
     
     logistic <- function(x){ 1/(1+exp(-x)) }
     Est <- summary(r)$coefficient[,1]
@@ -138,16 +147,17 @@ swarming_output <- function(){
     ggsave("output/field_swarm_fitting_temp.pdf",
            width=3, height=5)  
     
-    
+    cat("##### ave temp #####\n")
     r <- glmer(cbind(alates, alate_remaining_nest)~ave_temp+(1|colony_id), 
                family=binomial(link="logit"), data=d_field[d_field$end ==0,])
-    summary(r)
-    Anova(r)
+    print(summary(r))
+    print(Anova(r))
     
+    cat("##### min temp #####\n")
     r <- glmer(cbind(alates, alate_remaining_nest)~min_temp+(1|colony_id), 
                family=binomial(link="logit"), data=d_field[d_field$end ==0,])
-    summary(r)
-    Anova(r)
+    print(summary(r))
+    print(Anova(r))
   }
 
   # Comparison of the largest swarming
@@ -164,11 +174,16 @@ swarming_output <- function(){
       )
     
     # large swarm is prediced by treatment and/or colony size?
+    cat("----------------------------------------------\n")
+    cat("large swarm is prediced by treatment and/or colony size?\n")
+    cat("----------------------------------------------\n")
+    cat("glmer(cbind(total_swarm, all_alates-total_swarm) ~ 
+    log10(total_swarm)*treat+(1|colony),family=binomial(link='logit')\n")
     r <- glmer(cbind(total_swarm, all_alates-total_swarm) ~ 
                  log10(total_swarm)*treat+(1|colony), 
                family=binomial(link="logit"), data=df_largest_swarm)
-    summary(r)
-    Anova(r)
+    print(summary(r))
+    print(Anova(r))
     
     logistic <- function(x){ 1/(1+exp(-x)) }
     Est <- summary(r)$coefficient[,1]
