@@ -1,4 +1,0 @@
-----------------------------------------------
-Logistic fitting max temp vs alate fraction in semi-field
-----------------------------------------------
-##### max temp #####

@@ -109,7 +109,7 @@ swarming_output <- function(){
   }
   
   # Logistic fitting max temp vs alate fraction in the field
-  sink("swarming_stat.txt")
+  sink("output/swarming_stat.txt")
   {
     cat("----------------------------------------------\n")
     cat("Logistic fitting max temp vs alate fraction in semi-field\n")
@@ -220,6 +220,7 @@ swarming_output <- function(){
     ggsave("output/largest_swarm.pdf",
            width=3, height=3)  
   }
+  sink()
 }
 #------------------------------------------------------------------------------#
 

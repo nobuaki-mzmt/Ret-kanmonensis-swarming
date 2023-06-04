@@ -1,0 +1,162 @@
+----------------------------------------------
+Logistic fitting max temp vs alate fraction in semi-field
+----------------------------------------------
+##### max temp #####
+glmer(cbind(alates, alate_remaining_nest)~max_temp+(1|colony_id), 
+        family=binomial(link="logit")
+summary(r)
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [
+glmerMod]
+ Family: binomial  ( logit )
+Formula: cbind(alates, alate_remaining_nest) ~ max_temp + (1 | colony_id)
+   Data: d_field[d_field$end == 0, ]
+
+     AIC      BIC   logLik deviance df.resid 
+ 23715.0  23724.5 -11854.5  23709.0      173 
+
+Scaled residuals: 
+   Min     1Q Median     3Q    Max 
+-42.95  -2.09  -0.37  -0.04 381.44 
+
+Random effects:
+ Groups    Name        Variance Std.Dev.
+ colony_id (Intercept) 6.699    2.588   
+Number of obs: 176, groups:  colony_id, 7
+
+Fixed effects:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -19.377967   0.997053  -19.43   <2e-16 ***
+max_temp      0.598848   0.006189   96.76   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+         (Intr)
+max_temp -0.187
+Anova(r)
+Analysis of Deviance Table (Type II Wald chisquare tests)
+
+Response: cbind(alates, alate_remaining_nest)
+          Chisq Df Pr(>Chisq)    
+max_temp 9363.1  1  < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+##### ave temp #####
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [
+glmerMod]
+ Family: binomial  ( logit )
+Formula: cbind(alates, alate_remaining_nest) ~ ave_temp + (1 | colony_id)
+   Data: d_field[d_field$end == 0, ]
+
+     AIC      BIC   logLik deviance df.resid 
+ 26039.0  26048.5 -13016.5  26033.0      173 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-29.297  -3.355  -1.087  -0.265 222.493 
+
+Random effects:
+ Groups    Name        Variance Std.Dev.
+ colony_id (Intercept) 3.102    1.761   
+Number of obs: 176, groups:  colony_id, 7
+
+Fixed effects:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -12.182343   0.674235  -18.07   <2e-16 ***
+ave_temp      0.974436   0.008815  110.54   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+         (Intr)
+ave_temp -0.142
+Analysis of Deviance Table (Type II Wald chisquare tests)
+
+Response: cbind(alates, alate_remaining_nest)
+         Chisq Df Pr(>Chisq)    
+ave_temp 12219  1  < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+##### min temp #####
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [
+glmerMod]
+ Family: binomial  ( logit )
+Formula: cbind(alates, alate_remaining_nest) ~ min_temp + (1 | colony_id)
+   Data: d_field[d_field$end == 0, ]
+
+     AIC      BIC   logLik deviance df.resid 
+ 52439.0  52448.5 -26216.5  52433.0      173 
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-16.861  -8.409  -5.156  -0.739 233.196 
+
+Random effects:
+ Groups    Name        Variance Std.Dev.
+ colony_id (Intercept) 0.2109   0.4593  
+Number of obs: 176, groups:  colony_id, 7
+
+Fixed effects:
+             Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -2.908693   0.176832  -16.45   <2e-16 ***
+min_temp     0.103030   0.004256   24.21   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+         (Intr)
+min_temp -0.016
+Analysis of Deviance Table (Type II Wald chisquare tests)
+
+Response: cbind(alates, alate_remaining_nest)
+          Chisq Df Pr(>Chisq)    
+min_temp 585.99  1  < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+----------------------------------------------
+large swarm is prediced by treatment and/or colony size?
+----------------------------------------------
+glmer(cbind(total_swarm, all_alates-total_swarm) ~ 
+    log10(total_swarm)*treat+(1|colony),family=binomial(link='logit')
+Generalized linear mixed model fit by maximum likelihood (Laplace Approximation) [
+glmerMod]
+ Family: binomial  ( logit )
+Formula: cbind(total_swarm, all_alates - total_swarm) ~ log10(total_swarm) *  
+    treat + (1 | colony)
+   Data: df_largest_swarm
+
+     AIC      BIC   logLik deviance df.resid 
+   138.9    141.8    -64.5    128.9        8 
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-0.05004 -0.03954 -0.01046  0.10589  1.00145 
+
+Random effects:
+ Groups Name        Variance Std.Dev.
+ colony (Intercept) 3.456    1.859   
+Number of obs: 13, groups:  colony, 13
+
+Fixed effects:
+                            Estimate Std. Error z value Pr(>|z|)  
+(Intercept)                  -2.6462     2.6818  -0.987   0.3238  
+log10(total_swarm)            2.0227     1.0019   2.019   0.0435 *
+treatlab                     -1.1784     4.7412  -0.249   0.8037  
+log10(total_swarm):treatlab   0.7148     2.1744   0.329   0.7423  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr) lg10(_) tretlb
+lg10(ttl_s) -0.963               
+treatlab    -0.566  0.544        
+lg10(ttl_):  0.443 -0.461  -0.969
+Analysis of Deviance Table (Type II Wald chisquare tests)
+
+Response: cbind(total_swarm, all_alates - total_swarm)
+                          Chisq Df Pr(>Chisq)  
+log10(total_swarm)       5.9786  1    0.01448 *
+treat                    0.0788  1    0.77890  
+log10(total_swarm):treat 0.1081  1    0.74234  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
