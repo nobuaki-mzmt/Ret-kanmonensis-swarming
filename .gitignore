@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-scripts/old
-data/old
+old
+data/original
