@@ -1,7 +1,7 @@
 # README
 ## Article Information
 This repository provides access to the data and source code used for the manuscript    
-**The significance of social interactions in synchronized swarming flight in a termite**    
+### **The significance of social interactions in synchronized swarming flight in a termite**    
 Nobuaki Mizumoto, Tomonari Nozaki  
 
 Preprint will be available at bioRxiv. [![DOI:XXX](http://img.shields.io/badge/DOI-10.1101/XXX.svg)]  
