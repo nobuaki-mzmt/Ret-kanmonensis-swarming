@@ -105,5 +105,6 @@ Sim_output <- function(){
     xlab("Propotion of active alates at the initial state (~temperature activation)")+
     ylab("Propotion of active alates at the end (~dispersed individuals)")
   ggsave("output/model_resutls.pdf", width=5, height=3)
+  
 }
 #------------------------------------------------------------------------------#

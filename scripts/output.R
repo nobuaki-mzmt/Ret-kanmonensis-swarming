@@ -300,7 +300,7 @@ hybrid_output <- function(){
     ylab("Number of offspring")
   ggsave("output/hybgrid_offspring.pdf")
   
-  r <- glm(total ~ unit, family=poisson, data=d_suc)
+  r <- glm(offspring ~ unit, family=poisson, data=d_suc)
   Anova(r)
   multicomparison<-glht(r,linfct=mcp(unit="Tukey"))
   summary(multicomparison)
