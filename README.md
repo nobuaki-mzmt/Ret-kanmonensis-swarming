@@ -45,15 +45,3 @@ other attached packages:
 [10] lme4_1.1-34         Matrix_1.6-1        car_3.1-2          
 [13] carData_3.0-5       MASS_7.3-60        
 
-loaded via a namespace (and not attached):
- [1] gtable_0.3.3      dplyr_1.1.2       compiler_4.3.1    tidyselect_1.2.0 
- [5] Rcpp_1.0.10       gridExtra_2.3     splines_4.3.1     scales_1.2.1     
- [9] boot_1.3-28.1     lattice_0.21-8    R6_2.5.1          generics_0.1.3   
-[13] tibble_3.2.1      nloptr_2.0.3      munsell_0.5.0     minqa_1.2.6      
-[17] pillar_1.9.0      rlang_1.1.1       utf8_1.2.3        cli_3.6.1        
-[21] withr_2.5.0       magrittr_2.0.3    grid_4.3.1        rstudioapi_0.15.0
-[25] sandwich_3.0-2    lifecycle_1.0.3   nlme_3.1-162      vctrs_0.6.3      
-[29] glue_1.6.2        codetools_0.2-19  zoo_1.8-12        abind_1.4-5      
-[33] fansi_1.0.4       colorspace_2.1-0  tools_4.3.1       pkgconfig_2.0.3  
-> 
-```
