@@ -1,5 +1,4 @@
 ## Analysis for R.kanmonensis swarming
-## Nobuaki Mizumoto
 
 #------------------------------------------------------------------------------#
 {
