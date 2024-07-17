@@ -2,20 +2,20 @@
 ## Article Information
 This repository provides access to the data and source code used for the manuscript   
 ### **The significance of social interactions in synchronized swarming flight in a termite**    
-Author names are commented out for DBR.
-<!-- Nobuaki Mizumoto, Tomonari Nozaki  
+Nobuaki Mizumoto, Tomonari Nozaki  
+<!-- Author names are commented out for DBR.
 
 Preprint will be available at bioRxiv. [![DOI:XXX](http://img.shields.io/badge/DOI-10.1101/XXX.svg)]  
 The all data will be uploaded in Zenodo upon acceptance: [![DOI](https://zenodo.org/badge/DOI/XXXDOIXXX.svg)](https://doi.org/XXXDOIXXX) -->
 
-This study proposes the idea that synchronized termite swarming is the result of collective decision making within a group of alates, by providing a simulation model for synchronized swarming in termites. Also, we observed the swarming behavior in _Reticulitermes kanmonensis_ under both semi-natural and laboratory conditions to confirm 1) termites suppress minor dispersal flights under lower temperature, 2) they can synchronize flight even without environmental cues, 3) group size facilitate swarming.
-This includes data obtained empirical observations, R scripts to analyze them, and R scripts for simulations.
+This study proposes that synchronized termite swarming results from collective decision-making within a group of alates. We observed the swarming behavior in _Reticulitermes kanmonensis_ under both semi-natural and laboratory conditions to confirm 1) termites suppress minor dispersal flights under lower temperatures, 2) they can synchronize flight even without environmental cues, 3) group size facilitates swarming.
+This includes data obtained from empirical observations and R scripts to analyze them.
 
 ## Table of Contents
 * [README](./README.md)
 * [scripts](./scripts)
   * [output.R](./scripts/output.R) - output all plots and statistical analysis of empirical works
-  * [cdm_model.R](./scripts/cdm_model.R) - simple simulation model for collective decision making. ourput all plots.
+  <!-- * [cdm_model.R](./scripts/cdm_model.R) - simple simulation model for collective decision making. ourput all plots. -->
 * [output](./output) - all outputs are stored
 * [data](./data)
   * [raw](./data/raw) - raw data in .csv    
