@@ -6,7 +6,7 @@ Nobuaki Mizumoto, Tomonari Nozaki
 
 Contact, Nobuaki Mizumoto: nzm0095@auburn.edu  
 
-Preprint is available at bioRxiv. [![DOI:10.1101/2023.12.25.573318](http://img.shields.io/badge/DOI-10.1101/2023.12.25.573318/XXX.svg)]  
+Preprint is available at bioRxiv. [![DOI:10.1101/2023.12.25.573318](http://img.shields.io/badge/DOI-10.1101/2023.12.25.573318.svg)]  
 
 This study proposes that synchronized termite swarming results from collective decision-making within a group of alates. We observed the swarming behavior in _Reticulitermes kanmonensis_ under both semi-natural and laboratory conditions to confirm 1) termites suppress minor dispersal flights under lower temperatures, 2) they can synchronize flight even without environmental cues, 3) group size facilitates swarming.
 This includes data obtained from empirical observations and R scripts to analyze them.
