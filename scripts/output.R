@@ -126,6 +126,12 @@ swarming_output <- function(){
     cat('Anova(r)\n')
     print(Anova(r))
     
+    #r <- glm(cbind(alates, alate_remaining_nest)~max_temp, 
+    #         family=binomial(link="logit"), data=d_field[d_field$end ==0,])
+    #Anova(r)
+    #
+    #
+    
     logistic <- function(x){ 1/(1+exp(-x)) }
     Est <- summary(r)$coefficient[,1]
     fit_x <- seq(min(d_field[d_field$end==0,]$max_temp),
@@ -183,6 +189,12 @@ swarming_output <- function(){
                family=binomial(link="logit"), data=df_largest_swarm)
     print(summary(r))
     print(Anova(r))
+    
+    #r <- glm(cbind(total_swarm, all_alates-total_swarm) ~ 
+    #             log10(total_swarm)*treat, 
+    #           family=binomial(link="logit"), data=df_largest_swarm)
+    #print(summary(r))
+    #print(Anova(r))
     
     logistic <- function(x){ 1/(1+exp(-x)) }
     Est <- summary(r)$coefficient[,1]
