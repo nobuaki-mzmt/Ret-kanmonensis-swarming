@@ -3,10 +3,10 @@
 This repository provides access to the data and source code used for the manuscript   
 ### **The significance of social interactions in synchronized swarming flight in a termite**    
 Nobuaki Mizumoto, Tomonari Nozaki  
-<!-- Author names are commented out for DBR.
 
-Preprint will be available at bioRxiv. [![DOI:XXX](http://img.shields.io/badge/DOI-10.1101/XXX.svg)]  
-The all data will be uploaded in Zenodo upon acceptance: [![DOI](https://zenodo.org/badge/DOI/XXXDOIXXX.svg)](https://doi.org/XXXDOIXXX) -->
+Contact, Nobuaki Mizumoto: nzm0095@auburn.edu  
+
+Preprint is available at bioRxiv. [![DOI:10.1101/2023.12.25.573318](http://img.shields.io/badge/DOI-10.1101/2023.12.25.573318/XXX.svg)]  
 
 This study proposes that synchronized termite swarming results from collective decision-making within a group of alates. We observed the swarming behavior in _Reticulitermes kanmonensis_ under both semi-natural and laboratory conditions to confirm 1) termites suppress minor dispersal flights under lower temperatures, 2) they can synchronize flight even without environmental cues, 3) group size facilitates swarming.
 This includes data obtained from empirical observations and R scripts to analyze them.
@@ -19,6 +19,10 @@ This includes data obtained from empirical observations and R scripts to analyze
 * [output](./output) - all outputs are stored
 * [data](./data)
   * [raw](./data/raw) - raw data in .csv    
+    * **colony_foundation.csv** - data for colony foundation experiments. foundation: suucess (1) or not (0); unit: surviving reproductive combinations; PS: pre-soldiers
+    * **hybrid_foundation.csv** - data for hybrid colony foundation experiments.
+    * **lab_swarm.csv** - data for swarming experiments under the constant lab environments. 
+    * **semifield_swarm.csv** - data for swarming experiments under the semi-natural environments. 
 
 ## Session information
 ```
